@@ -455,7 +455,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
 ## Contact
 
-**Project Link**: [https://github.com/yourusername/warehousemind](https://github.com/yourusername/warehousemind)
+**Project Link**: [https://Mohammad-Khalifah1/industrial-ai-dashboard](https://github.com/Mohammad-Khalifah1/industrial-ai-dashboard)
 
 ---
 
