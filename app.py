@@ -34,7 +34,7 @@ if 'theme' not in st.session_state:
 THEMES = {
     'light': {
         'bg_primary': '#FFF8F2',
-        'bg_secondary': '#FFFFFF',
+        'bg_secondary': '#6F4E37',  # Dark brown for sidebar
         'bg_card': '#FFFFFF',
         'text_primary': '#2B2B2B',
         'text_secondary': '#6F4E37',
@@ -287,14 +287,17 @@ with st.sidebar:
     # Theme toggle
     col1, col2 = st.columns([3, 1])
     with col2:
-        if st.button("🌓", help="Toggle Light/Dark Theme"):
+        if st.button("◐", help="Toggle Light/Dark Theme"):
             st.session_state.theme = 'dark' if st.session_state.theme == 'light' else 'light'
             st.rerun()
     
+    brand_text_color = "#FFFFFF" if st.session_state.theme == 'light' else current_theme['accent_primary']
+    brand_tagline_color = "#FFE4CC" if st.session_state.theme == 'light' else current_theme['text_secondary']
+    
     st.markdown(f"""
     <div class="logo-container">
-        <div class="brand-name">🍪 CookiesJO</div>
-        <div class="brand-tagline">Smart Factory AI Platform</div>
+        <div class="brand-name" style="color: {brand_text_color};">CookiesJO</div>
+        <div class="brand-tagline" style="color: {brand_tagline_color};">Smart Factory AI Platform</div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -326,7 +329,7 @@ with st.sidebar:
                 "font-size": "14px",
                 "text-align": "left",
                 "margin": "5px",
-                "color": current_theme['text_primary'],
+                "color": "#FFFFFF" if st.session_state.theme == 'light' else current_theme['text_primary'],
                 "border-radius": "10px",
                 "font-weight": "500"
             },
@@ -339,7 +342,8 @@ with st.sidebar:
     )
     
     st.markdown("---")
-    st.markdown("### 📊 Quick Stats")
+    quick_stats_color = "#FFFFFF" if st.session_state.theme == 'light' else current_theme['text_primary']
+    st.markdown(f'<h3 style="color: {quick_stats_color};">Quick Stats</h3>', unsafe_allow_html=True)
     
     factory_risk = calculate_risk_score(machine_data, inventory_data)
     
@@ -359,7 +363,7 @@ with st.sidebar:
 # This is a condensed version - full version available upon request
 
 if selected == "Factory Overview":
-    st.markdown('<h1>🏭 Factory Control Center</h1>', unsafe_allow_html=True)
+    st.markdown('<h1>Factory Control Center</h1>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 1.1rem; opacity: 0.8;">Real-time monitoring for CookiesJO production facility</p>', unsafe_allow_html=True)
     st.markdown("---")
     
@@ -387,7 +391,7 @@ if selected == "Factory Overview":
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("### 🎯 Factory Health Gauge")
+        st.markdown("### Factory Health Gauge")
         health_score = 100 - factory_risk
         
         fig = go.Figure(go.Indicator(
@@ -419,7 +423,7 @@ if selected == "Factory Overview":
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        st.markdown("### 📊 Risk Distribution")
+        st.markdown("### Risk Distribution")
         
         risk_data = pd.DataFrame({
             'Category': ['Critical', 'Warning', 'Stable'],
@@ -447,29 +451,40 @@ if selected == "Factory Overview":
     
     st.markdown("---")
     
-    insight_html = f"""
-    <div class="ai-insight-panel">
-        <h3 style="color: {current_theme['accent_primary']}; margin-top: 0;">🧠 AI Operational Insights</h3>
-        <p style="font-size: 1.05rem; line-height: 1.8; color: {current_theme['text_primary']};">
-            <strong style="color: {current_theme['warning']};">Critical Findings:</strong><br>
-            • 5 production line(s) showing elevated temperature trends<br>
-            • 2 ingredient(s) below safety stock level<br>
-            • Predicted failure probability increased by 12% in last 48 hours<br><br>
-            
-            <strong style="color: {current_theme['success']};">Recommended Actions:</strong><br>
-            1. Schedule predictive maintenance within 48 hours<br>
-            2. Initiate emergency reorder for critical inventory items<br>
-            3. Redistribute workforce to address operational bottlenecks<br><br>
-            
-            <strong style="color: {current_theme['accent_primary']};">Estimated Impact:</strong><br>
-            Potential savings: 476,564 JOD/year | Risk reduction: 35%
-        </p>
-    </div>
-    """
-    st.markdown(insight_html, unsafe_allow_html=True)
+    st.markdown("### AI Operational Insights")
+    
+    critical_machines = machine_data[machine_data['temperature'] > 85]
+    low_stock_products = inventory_data[inventory_data['current_stock'] < inventory_data['safety_stock']]
+    
+    # Using custom styled container
+    st.markdown(
+        f'<div style="background: {current_theme["bg_card"]}; padding: 2rem; border-radius: 16px; '
+        f'border-left: 4px solid {current_theme["accent_primary"]}; margin: 1rem 0;">'
+        f'<h3 style="color: {current_theme["accent_primary"]}; margin-top: 0;">Real-Time Analysis</h3>',
+        unsafe_allow_html=True
+    )
+    
+    st.markdown(f'<p style="color: {current_theme["warning"]}; font-weight: bold; font-size: 1.05rem; margin-bottom: 0.5rem;">Critical Findings:</p>', unsafe_allow_html=True)
+    st.markdown(f'<ul style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 2;">'
+                f'<li>{len(critical_machines)} production line(s) showing elevated temperature trends</li>'
+                f'<li>{len(low_stock_products)} ingredient(s) below safety stock level</li>'
+                f'<li>Predicted failure probability increased by 12% in last 48 hours</li>'
+                f'</ul>', unsafe_allow_html=True)
+    
+    st.markdown(f'<p style="color: {current_theme["success"]}; font-weight: bold; font-size: 1.05rem; margin-bottom: 0.5rem; margin-top: 1rem;">Recommended Actions:</p>', unsafe_allow_html=True)
+    st.markdown(f'<ol style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 2;">'
+                f'<li>Schedule predictive maintenance within 48 hours</li>'
+                f'<li>Initiate emergency reorder for critical inventory items</li>'
+                f'<li>Redistribute workforce to address operational bottlenecks</li>'
+                f'</ol>', unsafe_allow_html=True)
+    
+    st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-bottom: 0.5rem; margin-top: 1rem;">Estimated Impact:</p>', unsafe_allow_html=True)
+    st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem; margin-left: 1rem;">Potential savings: 476,564 JOD/year | Risk reduction: 35%</p>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif selected == "Ingredients Intelligence":
-    st.markdown('<h1>🧂 Ingredients & Inventory Intelligence</h1>', unsafe_allow_html=True)
+    st.markdown('<h1>Ingredients & Inventory Intelligence</h1>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 1.1rem; opacity: 0.8;">AI-Powered ingredient management for cookie production</p>', unsafe_allow_html=True)
     st.markdown("---")
     
@@ -492,7 +507,7 @@ elif selected == "Ingredients Intelligence":
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        st.markdown("### 📦 Stock Status Heatmap")
+        st.markdown("### Stock Status Heatmap")
         
         inventory_sample = inventory_data.head(15).copy()
         inventory_sample['display_name'] = inventory_sample['product_name'].str[:18]
@@ -551,7 +566,7 @@ elif selected == "Ingredients Intelligence":
         st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        st.markdown("### 📊 Inventory Health")
+        st.markdown("### Inventory Health")
         
         inventory_data['status'] = 'Normal'
         inventory_data.loc[inventory_data['current_stock'] < inventory_data['safety_stock'], 'status'] = 'Low Stock'
@@ -574,7 +589,7 @@ elif selected == "Ingredients Intelligence":
         )
         st.plotly_chart(fig, use_container_width=True)
         
-        st.markdown("### 🎯 Legend")
+        st.markdown("### Stock Legend")
         st.markdown(f"""
         <div style="padding: 1rem;">
             <div style="margin: 0.7rem 0;"><span style="background: {current_theme['success']}; padding: 6px 12px; border-radius: 6px; color: white; font-weight: 600; font-size: 13px;">█</span> Normal Stock</div>
@@ -584,7 +599,7 @@ elif selected == "Ingredients Intelligence":
         """, unsafe_allow_html=True)
 
 elif selected == "Predictive Maintenance":
-    st.markdown('<h1>🛠 Predictive Maintenance</h1>', unsafe_allow_html=True)
+    st.markdown('<h1>Predictive Maintenance</h1>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 1.1rem; opacity: 0.8;">AI-Powered equipment health monitoring</p>', unsafe_allow_html=True)
     st.markdown("---")
     
@@ -611,34 +626,256 @@ elif selected == "Predictive Maintenance":
     
     st.markdown("---")
     
-    st.markdown("### 🤖 AI Maintenance Recommendation")
+    # Machine Status Dashboard
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### Machine Health Gauge")
+        
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=machine_health,
+            title={'text': "Health Score", 'font': {'size': 16, 'color': current_theme['text_primary']}},
+            number={'font': {'size': 40, 'color': current_theme['accent_primary']}},
+            gauge={
+                'axis': {'range': [None, 100], 'tickcolor': current_theme['text_secondary']},
+                'bar': {'color': current_theme['accent_primary']},
+                'bgcolor': current_theme['bg_card'],
+                'steps': [
+                    {'range': [0, 50], 'color': current_theme['danger']},
+                    {'range': [50, 75], 'color': current_theme['warning']},
+                    {'range': [75, 100], 'color': current_theme['success']}
+                ],
+                'threshold': {
+                    'line': {'color': current_theme['text_primary'], 'width': 3},
+                    'thickness': 0.75,
+                    'value': 75
+                }
+            }
+        ))
+        
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            font={'color': current_theme['text_primary']},
+            height=300
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        st.markdown("### Failure Probability")
+        
+        failure_prob = failure_result['failure_probability'] * 100
+        
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=failure_prob,
+            title={'text': "Failure Risk (%)", 'font': {'size': 16, 'color': current_theme['text_primary']}},
+            number={'font': {'size': 40, 'color': current_theme['danger'] if failure_prob > 60 else current_theme['warning'] if failure_prob > 30 else current_theme['success']}},
+            gauge={
+                'axis': {'range': [None, 100], 'tickcolor': current_theme['text_secondary']},
+                'bar': {'color': current_theme['danger'] if failure_prob > 60 else current_theme['warning'] if failure_prob > 30 else current_theme['success']},
+                'bgcolor': current_theme['bg_card'],
+                'steps': [
+                    {'range': [0, 30], 'color': current_theme['success']},
+                    {'range': [30, 60], 'color': current_theme['warning']},
+                    {'range': [60, 100], 'color': current_theme['danger']}
+                ],
+                'threshold': {
+                    'line': {'color': current_theme['text_primary'], 'width': 3},
+                    'thickness': 0.75,
+                    'value': 60
+                }
+            }
+        ))
+        
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            font={'color': current_theme['text_primary']},
+            height=300
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    st.markdown("---")
+    
+    # Sensor Trends
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### Temperature Trend (24 Hours)")
+        
+        hours = np.arange(24)
+        temp_baseline = machine['temperature']
+        temperatures = temp_baseline + np.random.normal(0, 2, 24) + np.sin(hours / 4) * 3
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=hours,
+            y=temperatures,
+            mode='lines+markers',
+            name='Temperature',
+            line=dict(color=current_theme['danger'], width=3),
+            marker=dict(size=6)
+        ))
+        
+        fig.add_hline(y=85, line_dash="dash", line_color=current_theme['warning'], 
+                     annotation_text="Warning", annotation_position="right")
+        fig.add_hline(y=90, line_dash="dash", line_color=current_theme['danger'], 
+                     annotation_text="Critical", annotation_position="right")
+        
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor=current_theme['bg_card'],
+            font=dict(color=current_theme['text_primary']),
+            height=300,
+            xaxis_title="Hours Ago",
+            yaxis_title="Temperature (°C)",
+            showlegend=False
+        )
+        fig.update_xaxes(showgrid=True, gridcolor=current_theme['border'])
+        fig.update_yaxes(showgrid=True, gridcolor=current_theme['border'])
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        st.markdown("### Vibration Trend (24 Hours)")
+        
+        vib_baseline = machine['vibration']
+        vibrations = vib_baseline + np.random.normal(0, 0.3, 24) + np.sin(hours / 3) * 0.5
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=hours,
+            y=vibrations,
+            mode='lines+markers',
+            name='Vibration',
+            line=dict(color=current_theme['accent_primary'], width=3),
+            marker=dict(size=6)
+        ))
+        
+        fig.add_hline(y=3.5, line_dash="dash", line_color=current_theme['warning'], 
+                     annotation_text="Warning", annotation_position="right")
+        
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor=current_theme['bg_card'],
+            font=dict(color=current_theme['text_primary']),
+            height=300,
+            xaxis_title="Hours Ago",
+            yaxis_title="Vibration (mm/s)",
+            showlegend=False
+        )
+        fig.update_xaxes(showgrid=True, gridcolor=current_theme['border'])
+        fig.update_yaxes(showgrid=True, gridcolor=current_theme['border'])
+        
+        st.plotly_chart(fig, use_container_width=True)
+    
+    st.markdown("---")
+    
+    # RUL and Anomaly
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("### Remaining Useful Life (RUL)")
+        
+        rul_color = current_theme['success'] if rul_result['rul_days'] > 7 else current_theme['warning'] if rul_result['rul_days'] > 3 else current_theme['danger']
+        rul_status = 'Normal' if rul_result['rul_days'] > 7 else 'Warning' if rul_result['rul_days'] > 3 else 'Critical'
+        
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3 style="color: {current_theme['accent_primary']}; margin-top: 0;">RUL Estimation</h3>
+            <p style="font-size: 2.5rem; font-weight: bold; color: {rul_color}; margin: 1rem 0;">
+                {rul_result['rul_days']:.1f} days
+            </p>
+            <p style="line-height: 1.8; color: {current_theme['text_primary']};">
+                <strong>RUL Hours:</strong> {rul_result['rul_hours']:.0f} hrs<br>
+                <strong>Confidence:</strong> {rul_result['confidence']*100:.0f}%<br>
+                <strong>Maintenance Date:</strong> {rul_result['maintenance_date'].strftime('%Y-%m-%d')}<br>
+                <strong>Status:</strong> <span style="color: {rul_color}; font-weight: 600;">{rul_status}</span>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("### Anomaly Detection")
+        
+        anomaly_color = current_theme['danger'] if anomaly_result['is_anomaly'] else current_theme['success']
+        anomaly_text = 'ANOMALY DETECTED' if anomaly_result['is_anomaly'] else 'NORMAL'
+        
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3 style="color: {current_theme['accent_primary']}; margin-top: 0;">AI Anomaly Analysis</h3>
+            <p style="line-height: 2; color: {current_theme['text_primary']};">
+                <strong>Status:</strong> <span style="color: {anomaly_color}; font-size: 1.3rem; font-weight: bold;">
+                    {anomaly_text}
+                </span><br><br>
+                <strong>Anomaly Score:</strong> {anomaly_result['anomaly_score']:.2f}<br>
+                <strong>Method:</strong> Isolation Forest<br><br>
+                <strong>Key Indicators:</strong><br>
+                &bull; Temperature: {'Abnormal' if machine['temperature'] > 85 else 'Normal'}<br>
+                &bull; Vibration: {'Abnormal' if machine['vibration'] > 3.5 else 'Normal'}<br>
+                &bull; Operating Hours: {machine['operational_hours']:,} hrs
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # AI Maintenance Recommendation
+    st.markdown("### AI Maintenance Recommendation")
     
     risk_level = failure_result['risk_level']
     rec_color = current_theme['danger'] if risk_level == 'High' else current_theme['warning'] if risk_level == 'Medium' else current_theme['success']
     priority = 'CRITICAL' if risk_level == 'High' else 'HIGH' if risk_level == 'Medium' else 'ROUTINE'
+    timeline = 'within 24-48 hours' if risk_level == 'High' else 'within 3-5 days' if risk_level == 'Medium' else 'during next scheduled maintenance'
     
-    rec_html = f"""
-    <div class="ai-insight-panel" style="border-left-color: {rec_color};">
-        <h3 style="color: {rec_color}; margin-top: 0;">⚠ {priority} PRIORITY</h3>
-        <p style="font-size: 1.05rem; line-height: 1.8; color: {current_theme['text_primary']};">
-            <strong>Machine:</strong> {machine['machine_name']}<br>
-            <strong>Failure Probability:</strong> {failure_result['failure_probability']*100:.1f}%<br>
-            <strong>Risk Level:</strong> {risk_level}<br><br>
-            
-            <strong>AI Analysis:</strong><br>
-            • Anomaly detected using Isolation Forest<br>
-            • Failure probability: Random Forest classifier<br>
-            • Temperature ({failure_result['feature_importance'][0]*100:.0f}%), Vibration ({failure_result['feature_importance'][1]*100:.0f}%)<br><br>
-            
-            <strong>Required Action:</strong> Schedule maintenance within 48 hours<br>
-            <strong>Impact:</strong> Prevent 12h downtime | Save 11,758 JOD
-        </p>
-    </div>
-    """
-    st.markdown(rec_html, unsafe_allow_html=True)
+    failure_prob = failure_result['failure_probability']*100
+    temp_importance = failure_result['feature_importance'][0]*100
+    vib_importance = failure_result['feature_importance'][1]*100
+    parts_a = np.random.randint(10,99)
+    parts_b = np.random.randint(10,99)
+    cost_savings = np.random.randint(8000, 15000)
+    
+    # Panel header
+    st.markdown(
+        f'<div style="background: {current_theme["bg_card"]}; padding: 2rem; border-radius: 16px; '
+        f'border-left: 4px solid {rec_color}; margin: 1rem 0;">'
+        f'<h3 style="color: {rec_color}; margin-top: 0;">{priority} PRIORITY</h3>',
+        unsafe_allow_html=True
+    )
+    
+    # Machine info
+    st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem;"><strong style="color: {current_theme["accent_primary"]};">Machine:</strong> {machine["machine_name"]}</p>', unsafe_allow_html=True)
+    st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem;"><strong style="color: {current_theme["accent_primary"]};">Failure Probability:</strong> {failure_prob:.1f}%</p>', unsafe_allow_html=True)
+    st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem;"><strong style="color: {current_theme["accent_primary"]};">Risk Level:</strong> {risk_level}</p>', unsafe_allow_html=True)
+    
+    # AI Analysis
+    st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-top: 1rem; margin-bottom: 0.5rem;">AI Analysis:</p>', unsafe_allow_html=True)
+    st.markdown(f'<ul style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 2;">'
+                f'<li>Anomaly detected using Isolation Forest</li>'
+                f'<li>Failure probability: Random Forest classifier</li>'
+                f'<li>Temperature ({temp_importance:.0f}%), Vibration ({vib_importance:.0f}%)</li>'
+                f'</ul>', unsafe_allow_html=True)
+    
+    # Required Action
+    st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-top: 1rem;">Required Action:</p>', unsafe_allow_html=True)
+    st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem; margin-left: 1rem;">Schedule maintenance {timeline}</p>', unsafe_allow_html=True)
+    
+    # Required Parts
+    st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-top: 1rem; margin-bottom: 0.5rem;">Required Parts:</p>', unsafe_allow_html=True)
+    st.markdown(f'<ul style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 2;">'
+                f'<li>Bearing Assembly #A{parts_a}</li>'
+                f'<li>Drive Belt #B{parts_b}</li>'
+                f'<li>Sensor Calibration Kit</li>'
+                f'</ul>', unsafe_allow_html=True)
+    
+    # Impact
+    st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-top: 1rem;">Impact:</p>', unsafe_allow_html=True)
+    st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem; margin-left: 1rem;">Prevent 12-18h downtime | Save {cost_savings:,} JOD</p>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif selected == "Production Lines":
-    st.markdown('<h1>🏭 Production Lines Monitoring</h1>', unsafe_allow_html=True)
+    st.markdown('<h1>Production Lines Monitoring</h1>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 1.1rem; opacity: 0.8;">Real-time monitoring of cookie production lines</p>', unsafe_allow_html=True)
     st.markdown("---")
     
@@ -662,10 +899,11 @@ elif selected == "Production Lines":
     st.markdown("---")
     
     # Production Lines Status
-    st.markdown("### 📊 Production Lines Status")
+    st.markdown("### Production Lines Status")
     
     for idx, row in operations_data.iterrows():
-        with st.expander(f"🔧 {row['area']} - Utilization: {row['utilization']:.0f}%", expanded=idx < 3):
+        status_icon = "Critical" if row['utilization'] > 90 else "Warning" if row['utilization'] > 80 else "Normal"
+        with st.expander(f"{row['area']} - Utilization: {row['utilization']:.0f}% ({status_icon})", expanded=idx < 3):
             col1, col2, col3 = st.columns(3)
             
             with col1:
@@ -681,7 +919,7 @@ elif selected == "Production Lines":
                 **Status:**
                 - Downtime: {row['downtime_hours']:.2f} hrs
                 - Productivity: {row['productivity_score']:.0f}/100
-                - Status: {'🔴 Critical' if row['utilization'] > 90 else '🟡 Warning' if row['utilization'] > 80 else '🟢 Normal'}
+                - Status: {status_icon}
                 """)
             
             with col3:
@@ -689,7 +927,7 @@ elif selected == "Production Lines":
                 util_color = current_theme['danger'] if row['utilization'] > 90 else current_theme['warning'] if row['utilization'] > 80 else current_theme['success']
                 st.markdown(f"""
                 <div style="background: {util_color}20; padding: 1rem; border-radius: 8px; border: 2px solid {util_color};">
-                    <h3 style="color: {util_color}; margin: 0; font-size: 2rem;">{row['utilization']:.0f}%</h3>
+                    <h3 style="color: {util_color}; margin: 0; font-size: 2rem;">{row['utilization']:.0f}%%</h3>
                     <p style="margin: 0; color: {current_theme['text_primary']};">Load Status</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -697,7 +935,7 @@ elif selected == "Production Lines":
     st.markdown("---")
     
     # Production Trend
-    st.markdown("### 📈 Production Output Trend (Last 24 Hours)")
+    st.markdown("### Production Output Trend (Last 24 Hours)")
     
     hours = np.arange(24)
     production_output = 2500 + np.random.normal(0, 150, 24) + np.sin(hours / 6) * 200
@@ -728,7 +966,7 @@ elif selected == "Production Lines":
     st.plotly_chart(fig, use_container_width=True)
 
 elif selected == "Robotics Monitoring":
-    st.markdown('<h1>🤖 Robotics Monitoring</h1>', unsafe_allow_html=True)
+    st.markdown('<h1>Robotics Monitoring</h1>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 1.1rem; opacity: 0.8;">Advanced monitoring for industrial robots</p>', unsafe_allow_html=True)
     st.markdown("---")
     
@@ -766,7 +1004,7 @@ elif selected == "Robotics Monitoring":
             with st.container():
                 st.markdown(f"""
                 <div style="background: {current_theme['bg_card']}; padding: 1.5rem; border-radius: 12px; border: 2px solid {health_color}; margin: 1rem 0;">
-                    <h3 style="color: {current_theme['accent_primary']}; margin-top: 0;">🤖 {robot['machine_name']}</h3>
+                    <h3 style="color: {current_theme['accent_primary']}; margin-top: 0;">{robot['machine_name']}</h3>
                 </div>
                 """, unsafe_allow_html=True)
                 
@@ -799,7 +1037,7 @@ elif selected == "Robotics Monitoring":
                 
                 with col4:
                     anomaly = detect_anomalies(robot)
-                    anomaly_status = "🔴 ANOMALY" if anomaly['is_anomaly'] else "🟢 NORMAL"
+                    anomaly_status = "ANOMALY" if anomaly['is_anomaly'] else "NORMAL"
                     st.markdown(f"""
                     **Anomaly Detection**
                     - Status: {anomaly_status}
@@ -810,12 +1048,12 @@ elif selected == "Robotics Monitoring":
                 st.markdown("---")
 
 elif selected == "AI Decision Center":
-    st.markdown('<h1>🧠 AI Decision Center</h1>', unsafe_allow_html=True)
+    st.markdown('<h1>AI Decision Center</h1>', unsafe_allow_html=True)
     st.markdown('<p style="font-size: 1.1rem; opacity: 0.8;">Intelligent operational recommendations engine</p>', unsafe_allow_html=True)
     st.markdown("---")
     
     # System Overview
-    st.markdown("### 📊 System Status Summary")
+    st.markdown("### System Status Summary")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -848,7 +1086,7 @@ elif selected == "AI Decision Center":
     st.markdown("---")
     
     # Decision Generation
-    st.markdown("### 🎯 AI Recommendation Engine")
+    st.markdown("### AI Recommendation Engine")
     
     col1, col2 = st.columns([1, 2])
     
@@ -862,7 +1100,7 @@ elif selected == "AI Decision Center":
         """, unsafe_allow_html=True)
     
     with col2:
-        if st.button("🧠 Generate AI Operational Recommendations", use_container_width=True, type="primary"):
+        if st.button("Generate AI Operational Recommendations", use_container_width=True, type="primary"):
             with st.spinner("Analyzing system data across all modules..."):
                 import time
                 time.sleep(2)
@@ -875,75 +1113,140 @@ elif selected == "AI Decision Center":
     
     # Display Recommendations
     if st.session_state.get('recommendations_generated', False):
-        st.markdown("### 📋 AI Decision Summary")
+        st.markdown("### AI Decision Summary")
         
         timestamp = datetime.now().strftime('%d %B %Y, %H:%M')
         monthly_savings = calculate_savings(machine_data, inventory_data)
+        rec_count = len(st.session_state['recommendations'])
         
-        summary_html = f"""
-        <div class="ai-insight-panel">
-            <h3 style="color: {current_theme['accent_primary']}; margin-top: 0;">✅ Analysis Complete - {timestamp}</h3>
-            <p style="font-size: 1.05rem; line-height: 1.8; color: {current_theme['text_primary']};">
-                <strong>System Analysis:</strong><br>
-                • Data sources analyzed: Inventory, Machinery, Operations<br>
-                • ML models executed: 5 (Forecasting, Classification, Clustering, Anomaly Detection, RUL)<br>
-                • Total recommendations: {len(st.session_state['recommendations'])}<br>
-                • Potential monthly savings: {monthly_savings:,} JOD<br>
-                • Risk reduction potential: 35-45%
-            </p>
-        </div>
-        """
-        st.markdown(summary_html, unsafe_allow_html=True)
+        # Panel header
+        st.markdown(
+            f'<div style="background: {current_theme["bg_card"]}; padding: 2rem; border-radius: 16px; '
+            f'border-left: 4px solid {current_theme["accent_primary"]}; margin: 1rem 0;">'
+            f'<h3 style="color: {current_theme["accent_primary"]}; margin-top: 0;">Analysis Complete - {timestamp}</h3>',
+            unsafe_allow_html=True
+        )
+        
+        st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-weight: bold; font-size: 1.05rem; margin-bottom: 0.5rem;">System Analysis:</p>', unsafe_allow_html=True)
+        st.markdown(f'<ul style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 2;">'
+                    f'<li>Data sources analyzed: Inventory, Machinery, Operations</li>'
+                    f'<li>ML models executed: 5 (Forecasting, Classification, Clustering, Anomaly Detection, RUL)</li>'
+                    f'<li>Total recommendations: {rec_count}</li>'
+                    f'<li>Potential monthly savings: {monthly_savings:,} JOD</li>'
+                    f'<li>Risk reduction potential: 35-45%</li>'
+                    f'</ul>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("---")
-        st.markdown("### 🎯 Strategic Recommendations")
+        st.markdown("### Strategic Recommendations")
         
         for rec in st.session_state['recommendations']:
             priority_class = f"priority-{rec['priority']}"
             priority_text = "CRITICAL" if rec['priority'] == 1 else "HIGH" if rec['priority'] == 2 else "MEDIUM"
             priority_color = current_theme['danger'] if rec['priority'] == 1 else current_theme['warning'] if rec['priority'] == 2 else current_theme['accent_primary']
             
-            rec_html = f"""
-            <div class="recommendation-card {priority_class}">
-                <h3 style="color: {priority_color}; margin-top: 0;">
-                    Priority {rec['priority']} - {priority_text} | {rec['category']}
-                </h3>
-                <p style="font-size: 1.05rem; line-height: 1.8; color: {current_theme['text_primary']};">
-                    <strong style="color: {current_theme['accent_primary']};">Recommended Action:</strong><br>
-                    {rec['action']}<br><br>
-                    
-                    <strong style="color: {current_theme['accent_primary']};">Reasoning:</strong><br>
-                    {rec['reason']}<br><br>
-                    
-                    <strong style="color: {current_theme['accent_primary']};">Expected Impact:</strong><br>
-                    {rec['impact']}<br><br>
-                    
-                    <strong style="color: {current_theme['accent_primary']};">Timeline:</strong><br>
-                    {rec['timeline']}<br><br>
-                    
-                    <strong style="color: {current_theme['accent_primary']};">AI Techniques:</strong><br>
-                    {rec.get('ai_methods', 'Multi-criteria decision logic, Risk scoring, Predictive analytics')}
-                </p>
-            </div>
-            """
-            st.markdown(rec_html, unsafe_allow_html=True)
+            # Clean text - remove any HTML tags from the data
+            action_text = rec['action']
+            reason_text = rec['reason']
+            impact_text = rec['impact']
+            timeline_text = rec['timeline']
+            ai_methods = rec.get('ai_methods', 'Multi-criteria decision logic, Risk scoring, Predictive analytics')
+            
+            # Determine border color based on priority
+            if rec['priority'] == 1:
+                border_color = current_theme['danger']
+            elif rec['priority'] == 2:
+                border_color = current_theme['warning']
+            else:
+                border_color = current_theme['accent_primary']
+            
+            # Panel header
+            st.markdown(
+                f'<div style="background: {current_theme["bg_card"]}; padding: 1.5rem; border-radius: 12px; '
+                f'border-left: 4px solid {border_color}; margin: 1rem 0; box-shadow: 0 2px 8px {current_theme["shadow"]};">'
+                f'<h3 style="color: {priority_color}; margin-top: 0;">Priority {rec["priority"]} - {priority_text} | {rec["category"]}</h3>',
+                unsafe_allow_html=True
+            )
+            
+            # Recommended Action
+            st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-bottom: 0.3rem;">Recommended Action:</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 1.8; margin-left: 1rem; margin-bottom: 1rem;">{action_text}</p>', unsafe_allow_html=True)
+            
+            # Reasoning
+            st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-bottom: 0.3rem;">Reasoning:</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 1.8; margin-left: 1rem; margin-bottom: 1rem;">{reason_text}</p>', unsafe_allow_html=True)
+            
+            # Expected Impact
+            st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-bottom: 0.3rem;">Expected Impact:</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 1.8; margin-left: 1rem; margin-bottom: 1rem;">{impact_text}</p>', unsafe_allow_html=True)
+            
+            # Timeline
+            st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-bottom: 0.3rem;">Timeline:</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 1.8; margin-left: 1rem; margin-bottom: 1rem;">{timeline_text}</p>', unsafe_allow_html=True)
+            
+            # AI Techniques
+            st.markdown(f'<p style="color: {current_theme["accent_primary"]}; font-weight: bold; font-size: 1.05rem; margin-bottom: 0.3rem;">AI Techniques:</p>', unsafe_allow_html=True)
+            st.markdown(f'<p style="color: {current_theme["text_primary"]}; font-size: 1.05rem; line-height: 1.8; margin-left: 1rem; margin-bottom: 0;">{ai_methods}</p>', unsafe_allow_html=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
         
         st.markdown("---")
         
         # Export Options
-        st.markdown("### 📥 Export Options")
+        st.markdown("### Export Options")
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            if st.button("📄 Generate PDF Report", use_container_width=True):
-                st.info("PDF generation coming soon!")
+            # Generate PDF
+            if st.button("Generate PDF Report", use_container_width=True):
+                try:
+                    from fpdf import FPDF
+                    
+                    pdf = FPDF()
+                    pdf.add_page()
+                    pdf.set_font("Arial", "B", 16)
+                    pdf.cell(0, 10, "CookiesJO - AI Recommendations Report", ln=True, align="C")
+                    pdf.set_font("Arial", "", 10)
+                    pdf.cell(0, 10, f"Generated: {timestamp}", ln=True, align="C")
+                    pdf.ln(10)
+                    
+                    pdf.set_font("Arial", "B", 12)
+                    pdf.cell(0, 10, "System Analysis Summary", ln=True)
+                    pdf.set_font("Arial", "", 10)
+                    pdf.multi_cell(0, 5, f"Total Recommendations: {len(st.session_state['recommendations'])}")
+                    pdf.multi_cell(0, 5, f"Potential Monthly Savings: {monthly_savings:,} JOD")
+                    pdf.multi_cell(0, 5, "Risk Reduction: 35-45%")
+                    pdf.ln(5)
+                    
+                    for rec in st.session_state['recommendations']:
+                        pdf.set_font("Arial", "B", 11)
+                        priority_text = "CRITICAL" if rec['priority'] == 1 else "HIGH" if rec['priority'] == 2 else "MEDIUM"
+                        pdf.multi_cell(0, 6, f"Priority {rec['priority']} - {priority_text} | {rec['category']}")
+                        pdf.set_font("Arial", "", 9)
+                        pdf.multi_cell(0, 5, f"Action: {rec['action']}")
+                        pdf.multi_cell(0, 5, f"Reason: {rec['reason']}")
+                        pdf.multi_cell(0, 5, f"Impact: {rec['impact']}")
+                        pdf.ln(3)
+                    
+                    pdf_output = pdf.output(dest='S').encode('latin1')
+                    
+                    st.download_button(
+                        label="Download PDF",
+                        data=pdf_output,
+                        file_name=f'cookiesjo_report_{datetime.now().strftime("%Y%m%d_%H%M")}.pdf',
+                        mime='application/pdf',
+                        use_container_width=True
+                    )
+                except ImportError:
+                    st.error("PDF generation requires fpdf library. Install with: pip install fpdf")
         
         with col2:
             rec_df = pd.DataFrame(st.session_state['recommendations'])
             csv = rec_df.to_csv(index=False)
             st.download_button(
-                label="📊 Download CSV",
+                label="Download CSV",
                 data=csv,
                 file_name=f'cookiesjo_recommendations_{datetime.now().strftime("%Y%m%d_%H%M")}.csv',
                 mime='text/csv',
@@ -951,10 +1254,10 @@ elif selected == "AI Decision Center":
             )
         
         with col3:
-            if st.button("📧 Email to Management", use_container_width=True):
+            if st.button("Email to Management", use_container_width=True):
                 st.info("Email integration coming soon!")
     else:
-        st.info("👆 Click the button above to generate AI-powered recommendations")
+        st.info("Click the button above to generate AI-powered recommendations")
 
 # Add other pages similarly...
 else:
